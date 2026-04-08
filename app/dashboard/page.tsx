@@ -12,12 +12,17 @@ export const revalidate = 3600; // ISR: re-generate every hour
 
 async function getInitialLGUs(): Promise<LGUData[]> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  
+  // Vercel build environments do not run a localhost server. Recursive fetching crashes the builder.
+  if (baseUrl === 'http://localhost:3000' && process.env.VERCEL) {
+    return [];
+  }
+
   try {
     const res = await fetch(`${baseUrl}/api/lgu-list`, { next: { revalidate: 3600 } });
     if (!res.ok) return [];
     return res.json();
   } catch (error) {
-    console.error("Failed to fetch initial LGUs", error);
     return [];
   }
 }

@@ -1,0 +1,149 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Manila"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [120.961, 14.556],
+            [120.999, 14.556],
+            [120.999, 14.615],
+            [120.961, 14.615],
+            [120.961, 14.556]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Quezon City"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [121.030, 14.590],
+            [121.135, 14.590],
+            [121.135, 14.750],
+            [121.030, 14.750],
+            [121.030, 14.590]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cebu City"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [123.848, 10.280],
+            [123.932, 10.280],
+            [123.932, 10.385],
+            [123.848, 10.385],
+            [123.848, 10.280]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Davao City"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [125.541, 7.044],
+            [125.640, 7.044],
+            [125.640, 7.152],
+            [125.541, 7.152],
+            [125.541, 7.044]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Caloocan"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [120.953, 14.620],
+            [121.006, 14.620],
+            [121.006, 14.763],
+            [120.953, 14.763],
+            [120.953, 14.620]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Taguig"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [121.028, 14.485],
+            [121.085, 14.485],
+            [121.085, 14.565],
+            [121.028, 14.565],
+            [121.028, 14.485]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Iloilo City"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [122.526, 10.685],
+            [122.582, 10.685],
+            [122.582, 10.735],
+            [122.526, 10.735],
+            [122.526, 10.685]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Zamboanga City"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [122.045, 6.880],
+            [122.120, 6.880],
+            [122.120, 6.960],
+            [122.045, 6.960],
+            [122.045, 6.880]
+          ]
+        ]
+      }
+    }
+  ]
+}

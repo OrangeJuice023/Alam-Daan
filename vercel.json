@@ -1,15 +1,4 @@
 {
-  "functions": {
-    "app/api/lgu-list/route.ts": {
-      "maxDuration": 30
-    },
-    "app/api/classify/route.ts": {
-      "maxDuration": 15
-    },
-    "app/api/satellite/route.ts": {
-      "maxDuration": 15
-    }
-  },
   "headers": [
     {
       "source": "/api/(.*)",

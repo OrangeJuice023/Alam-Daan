@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // @ts-ignore - The OpenRouter SDK types in ^0.11.2 are slightly misaligned with its documentation examples causing build failures
     const responseStream = await openrouter.chat.send({
       model: "nvidia/nemotron-nano-12b-v2-vl:free",
       messages: [

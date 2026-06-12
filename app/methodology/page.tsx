@@ -9,7 +9,7 @@ export default function MethodologyPage() {
   return (
     <>
       <Header />
-      <main className="flex-1 overflow-y-auto w-full p-8 md:p-12 relative flex flex-col justify-center min-h-[calc(100vh-64px)]">
+      <main className="flex-1 overflow-y-auto w-full px-6 py-12 md:px-12 md:py-16 relative">
         <div className="w-full max-w-[1400px] mx-auto">
           <div className="mb-12 border-b border-white/10 pb-8 flex flex-col md:flex-row justify-between md:items-end gap-6">
             <div className="max-w-3xl">

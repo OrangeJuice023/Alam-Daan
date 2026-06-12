@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { Header } from '@/components/shared/Header';
 import { DynamicStressMap } from '@/components/dashboard/DynamicStressMap';
 import { LoadingSkeleton } from '@/components/shared/LoadingSkeleton';
+import { HowToUse } from '@/components/shared/HowToUse';
 import { getLGUList } from '@/lib/server/lguService';
 import type { LGUData } from '@/lib/types';
 
@@ -41,6 +42,7 @@ export default async function MapPage() {
           </div>
         </div>
       </main>
+      <HowToUse />
     </>
   );
 }

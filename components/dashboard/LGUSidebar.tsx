@@ -6,7 +6,7 @@ import { useDashboardStore } from '@/store/dashboardStore';
 import { TierBadge } from '@/components/shared/TierBadge';
 import { LoadingSkeleton } from '@/components/shared/LoadingSkeleton';
 import type { LGUData, PriorityTier } from '@/lib/types';
-import { Activity, AlertTriangle, ShieldCheck, Map as MapIcon } from 'lucide-react';
+import { Map as MapIcon } from 'lucide-react';
 
 export function LGUSidebar({ initialLGUs }: { initialLGUs: LGUData[] }) {
   const { lguList, isLoading } = useLGUList();
@@ -81,48 +81,40 @@ export function LGUSidebar({ initialLGUs }: { initialLGUs: LGUData[] }) {
           filteredLGUs.map((lgu) => {
             const isSelected = selectedLGU?.slug === lgu.slug;
             
+            const tierColor =
+              lgu.tier === 'URGENT' ? '#c0392b' :
+              lgu.tier === 'HIGH' ? '#d68910' :
+              lgu.tier === 'MODERATE' ? '#2e86c1' : '#1e8449';
+
             return (
               <button
                 key={lgu.slug}
                 onClick={() => setSelectedLGU(lgu)}
                 className={`
-                  w-full text-left p-4 rounded-lg transition-all duration-200 border relative overflow-hidden group
+                  w-full text-left rounded-md transition-colors duration-150 border flex items-stretch gap-3 px-3 py-2.5
                   ${isSelected
-                    ? 'bg-white/10 border-white/20 shadow-card'
-                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10 hover:-translate-y-0.5'}
+                    ? 'bg-white/10 border-white/20'
+                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'}
                 `}
               >
-                {isSelected && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#2e86c1] shadow-[0_0_10px_rgba(46,134,193,0.8)]" />
-                )}
-                
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className={`font-serif font-semibold text-base mb-0.5 ${isSelected ? 'text-white' : 'text-white/90 group-hover:text-white'}`}>
+                <span
+                  className="w-1 rounded-full shrink-0 self-stretch"
+                  style={{ backgroundColor: tierColor, opacity: isSelected ? 1 : 0.6 }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className={`font-serif font-semibold text-sm truncate ${isSelected ? 'text-white' : 'text-white/90'}`}>
                       {lgu.name}
                     </h3>
-                    <div className="text-[10px] text-white/40 uppercase tracking-wider font-mono">
-                      Region {lgu.region}
-                    </div>
-                  </div>
-                  <TierBadge tier={lgu.tier} />
-                </div>
-                
-                <div className="flex justify-between items-end mt-4">
-                  <div className="flex items-center gap-1.5 opacity-60">
-                    {lgu.tier === 'URGENT' || lgu.tier === 'HIGH' ? (
-                      <AlertTriangle className={`w-3.5 h-3.5 ${lgu.tier === 'URGENT' ? 'text-[#c0392b]' : 'text-[#d68910]'}`} />
-                    ) : (
-                      <ShieldCheck className="w-3.5 h-3.5 text-[#27ae60]" />
-                    )}
-                    <span className="text-xs font-mono">Rank #{lgu.priorityRank}</span>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="text-[9px] text-white/40 uppercase tracking-widest font-mono mb-[2px]">Stress Score</div>
-                    <div className={`font-mono font-medium ${isSelected ? 'text-white' : 'text-[#2e86c1]'}`}>
+                    <span className={`font-mono text-sm shrink-0 ${isSelected ? 'text-white' : 'text-[#5fa8d3]'}`}>
                       {lgu.urbanStressScore.toFixed(3)}
-                    </div>
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <span className="text-[10px] text-white/40 uppercase tracking-wider font-mono">
+                      #{lgu.priorityRank} · {lgu.region}
+                    </span>
+                    <TierBadge tier={lgu.tier} />
                   </div>
                 </div>
               </button>

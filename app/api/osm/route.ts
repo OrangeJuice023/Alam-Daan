@@ -1,20 +1,22 @@
+// app/api/osm/route.ts
 // GET /api/osm?bbox=lng1,lat1,lng2,lat2
 // Returns: GeoJSON FeatureCollection of road segments
 
 import { type NextRequest } from 'next/server';
 import type { RoadSegment } from '@/lib/types';
+import { parseBbox } from '@/lib/validate';
 
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const bbox = searchParams.get('bbox');
-
+  const bbox = parseBbox(req.nextUrl.searchParams.get('bbox'));
   if (!bbox) {
-    return Response.json({ error: 'bbox required' }, { status: 400 });
+    return Response.json(
+      { error: 'bbox required: lng1,lat1,lng2,lat2 within the Philippines, max 1.5° span' },
+      { status: 400 }
+    );
   }
 
-  const [west, south, east, north] = bbox.split(',').map(Number);
+  const [west, south, east, north] = bbox;
 
-  // Overpass QL: fetch all roads and footways within bbox
   const query = `
     [out:json][timeout:30];
     (
@@ -29,7 +31,7 @@ export async function GET(req: NextRequest) {
       method: 'POST',
       body: `data=${encodeURIComponent(query)}`,
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      next: { revalidate: 86400 }, // OSM data revalidates daily
+      next: { revalidate: 86400 },
     });
 
     if (!res.ok) {
@@ -38,7 +40,6 @@ export async function GET(req: NextRequest) {
 
     const osm = await res.json();
 
-    // Convert OSM elements to RoadSegment format
     const segments: RoadSegment[] = osm.elements
       .filter((el: Record<string, unknown>) => el.type === 'way' && el.geometry)
       .map((el: Record<string, unknown>) => ({
@@ -57,12 +58,12 @@ export async function GET(req: NextRequest) {
         },
       }));
 
-    return Response.json({ type: 'FeatureCollection', features: segments });
-  } catch (error) {
-    console.error('Overpass fetch error:', error);
     return Response.json(
-      { error: 'Failed to fetch from Overpass' },
-      { status: 502 }
+      { type: 'FeatureCollection', features: segments },
+      { headers: { 'Cache-Control': 's-maxage=86400, stale-while-revalidate=86400' } }
     );
+  } catch (err) {
+    console.error('Overpass fetch error:', err);
+    return Response.json({ error: 'Failed to fetch from Overpass' }, { status: 502 });
   }
 }

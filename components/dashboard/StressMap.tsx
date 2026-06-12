@@ -1,10 +1,17 @@
+// components/dashboard/StressMap.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useDashboardStore } from '@/store/dashboardStore';
 import type { LGUData } from '@/lib/types';
-import type { Map as LeafletMap } from 'leaflet';
+import type {
+  Map as LeafletMap,
+  GeoJSON as LeafletGeoJSON,
+  Layer,
+  LeafletMouseEvent,
+  PathOptions,
+} from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Dynamically import Leaflet components to avoid SSR issues
@@ -26,109 +33,125 @@ interface StressMapProps {
   fullHeight?: boolean;
 }
 
+type BoundaryFeature = GeoJSON.Feature<
+  GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  { slug?: string; name?: string }
+>;
+
+// Whole-archipelago view for the full-screen map page
+const PH_BOUNDS: [[number, number], [number, number]] = [
+  [4.6, 116.0],
+  [21.2, 127.0],
+];
+
+const TIER_COLORS: Record<LGUData['tier'], string> = {
+  URGENT: '#c0392b',
+  HIGH: '#d68910',
+  MODERATE: '#2e86c1',
+  LOW: '#1e8449',
+};
+
 export function StressMap({ lguList, fullHeight }: StressMapProps) {
   const { selectedLGU, setSelectedLGU, activeFilter } = useDashboardStore();
-  const [geoData, setGeoData] = useState<any>(null);
+  const [geoData, setGeoData] = useState<GeoJSON.FeatureCollection | null>(null);
   const [map, setMap] = useState<LeafletMap | null>(null);
+  const geoJsonRef = useRef<LeafletGeoJSON | null>(null);
+  const hasInteractedRef = useRef(false);
 
-  // Load GeoJSON data
+  // Load boundary polygons
   useEffect(() => {
     fetch('/ph-lgu-boundaries.geojson')
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to load boundaries file; make sure public/ph-lgu-boundaries.geojson exists');
+        if (!res.ok) throw new Error('Missing public/ph-lgu-boundaries.geojson — run: node scripts/fetch-boundaries.mjs');
         return res.json();
       })
-      .then((data) => setGeoData(data))
+      .then(setGeoData)
       .catch((err) => console.error('Error loading GeoJSON:', err));
   }, []);
 
-  // Fly to selected LGU
+  // Initial framing: full map page shows the whole country, regardless of
+  // any selection carried over from the dashboard. Embedded map starts on
+  // the selection or Metro Manila.
   useEffect(() => {
-    if (map && selectedLGU) {
-      map.flyTo([selectedLGU.centroid[1], selectedLGU.centroid[0]], 12, {
-        duration: 1.5,
-      });
-    } else if (map && !selectedLGU) {
-      // Default to Manila area
-      map.flyTo([14.5995, 120.9842], 10, { duration: 1.5 });
+    if (!map) return;
+    if (fullHeight) {
+      map.fitBounds(PH_BOUNDS, { animate: false });
+    } else if (selectedLGU) {
+      map.setView([selectedLGU.centroid[1], selectedLGU.centroid[0]], 12, { animate: false });
+    } else {
+      map.setView([14.5995, 120.9842], 10, { animate: false });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, fullHeight]);
+
+  // Fly to a city only when the person actively changes the selection
+  // after the map is on screen.
+  useEffect(() => {
+    if (!map || !selectedLGU) return;
+    if (!hasInteractedRef.current) return;
+    map.flyTo([selectedLGU.centroid[1], selectedLGU.centroid[0]], 12, { duration: 1.2 });
   }, [map, selectedLGU]);
 
-  // Color mapping based on tier
-  const getStyle = (feature: any) => {
-    const slug = feature.properties.name?.toLowerCase().replace(/\s+/g, '-');
-    const lgu = lguList.find((l) => l.slug === slug || slug?.includes(l.slug));
-    
-    // Default inactive style
-    let fillColor = '#1c3354';
-    let weight = 1;
-    let fillOpacity = 0.2;
-    let color = 'rgba(255,255,255,0.2)';
+  const findLGU = (feature: BoundaryFeature): LGUData | undefined => {
+    // Prefer exact slug match (set by scripts/fetch-boundaries.mjs);
+    // fall back to slugified name for older boundary files.
+    if (feature.properties?.slug) {
+      return lguList.find((l) => l.slug === feature.properties.slug);
+    }
+    const nameSlug = feature.properties?.name?.toLowerCase().replace(/\s+/g, '-');
+    return lguList.find((l) => nameSlug === l.slug || nameSlug?.includes(l.slug));
+  };
 
-    if (lgu) {
-      // If filtering, dim non-matching
-      if (activeFilter !== 'ALL' && lgu.tier !== activeFilter) {
-        fillOpacity = 0.1;
-      } else {
-        fillOpacity = 0.6;
-        weight = selectedLGU?.slug === lgu.slug ? 3 : 1.5;
-        color = selectedLGU?.slug === lgu.slug ? '#ffffff' : 'rgba(255,255,255,0.3)';
-        
-        switch (lgu.tier) {
-          case 'URGENT': fillColor = '#c0392b'; break;
-          case 'HIGH': fillColor = '#d68910'; break;
-          case 'MODERATE': fillColor = '#2e86c1'; break;
-          case 'LOW': fillColor = '#1e8449'; break;
-        }
-      }
+  const getStyle = (feature?: GeoJSON.Feature): PathOptions => {
+    const lgu = feature ? findLGU(feature as BoundaryFeature) : undefined;
+
+    if (!lgu) {
+      return { fillColor: '#1c3354', weight: 1, opacity: 1, color: 'rgba(255,255,255,0.2)', fillOpacity: 0.2 };
     }
 
+    const dimmed = activeFilter !== 'ALL' && lgu.tier !== activeFilter;
+    const isSelected = selectedLGU?.slug === lgu.slug;
+
     return {
-      fillColor,
-      weight,
+      fillColor: TIER_COLORS[lgu.tier],
+      weight: isSelected ? 3 : 1.5,
       opacity: 1,
-      color,
-      fillOpacity,
+      color: isSelected ? '#ffffff' : 'rgba(255,255,255,0.3)',
+      fillOpacity: dimmed ? 0.1 : 0.55,
     };
   };
 
-  const onEachFeature = (feature: any, layer: any) => {
-    const slug = feature.properties.name?.toLowerCase().replace(/\s+/g, '-');
-    const lgu = lguList.find((l) => l.slug === slug || slug?.includes(l.slug));
+  const onEachFeature = (feature: GeoJSON.Feature, layer: Layer) => {
+    const lgu = findLGU(feature as BoundaryFeature);
+    if (!lgu) return;
 
-    if (lgu) {
-      layer.bindTooltip(`
-        <div class="px-2 py-1">
-          <div class="font-serif font-bold text-sm mb-1">${lgu.name}</div>
-          <div class="font-mono text-xs text-white/70">Score: ${lgu.urbanStressScore.toFixed(2)}</div>
-        </div>
-      `, { direction: 'top', className: 'lgu-tooltip' });
+    layer.bindTooltip(
+      `<div class="px-2 py-1">
+        <div class="font-serif font-bold text-sm mb-1">${lgu.name}</div>
+        <div class="font-mono text-xs text-white/70">Score: ${lgu.urbanStressScore.toFixed(2)} · ${lgu.tier}</div>
+      </div>`,
+      { direction: 'top', className: 'lgu-tooltip', sticky: true }
+    );
 
-      layer.on({
-        click: () => setSelectedLGU(lgu),
-        mouseover: (e: any) => {
-          const l = e.target;
-          l.setStyle({ weight: 3, fillOpacity: 0.8 });
-          l.bringToFront();
-        },
-        mouseout: (e: any) => {
-          const l = e.target;
-          GeoJSONLayer?.resetStyle(l);
-          if (selectedLGU?.slug === lgu.slug) {
-             l.setStyle({ weight: 3 });
-          }
-        },
-      });
-    }
+    layer.on({
+      click: () => {
+        hasInteractedRef.current = true;
+        setSelectedLGU(lgu);
+      },
+      mouseover: (e: LeafletMouseEvent) => {
+        e.target.setStyle({ weight: 3, fillOpacity: 0.8 });
+        e.target.bringToFront();
+      },
+      mouseout: (e: LeafletMouseEvent) => {
+        geoJsonRef.current?.resetStyle(e.target);
+      },
+    });
   };
-
-  // Keep a reference to the layer to reset styles on mouseout
-  let GeoJSONLayer: any;
 
   return (
     <div className={`${fullHeight ? 'flex-1 h-full' : 'h-[50vh] min-h-[400px]'} w-full relative z-0 border-b border-white/10`}>
       <MapContainer
-        center={[14.5995, 120.9842]} // Manila default
+        center={[14.5995, 120.9842]}
         zoom={10}
         scrollWheelZoom={true}
         className="h-full w-full bg-[#07111a]"
@@ -142,33 +165,44 @@ export function StressMap({ lguList, fullHeight }: StressMapProps) {
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
           maxZoom={19}
         />
-        
+
         {geoData && (
           <GeoJSON
-            ref={(ref) => { GeoJSONLayer = ref; }}
+            ref={geoJsonRef}
             data={geoData}
             style={getStyle}
             onEachFeature={onEachFeature}
           />
         )}
       </MapContainer>
-      
-      {/* Map overlay UI */}
+
+      {/* Zoom + reset controls */}
       <div className="absolute top-4 right-4 z-[400] flex gap-2">
-        <button 
+        <button
           onClick={() => map?.zoomIn()}
+          aria-label="Zoom in"
           className="w-8 h-8 bg-[#132338] border border-white/10 rounded shadow-card text-white flex items-center justify-center hover:bg-[#1c3354] transition-colors"
         >
           +
         </button>
-        <button 
+        <button
           onClick={() => map?.zoomOut()}
+          aria-label="Zoom out"
           className="w-8 h-8 bg-[#132338] border border-white/10 rounded shadow-card text-white flex items-center justify-center hover:bg-[#1c3354] transition-colors"
         >
-          -
+          −
         </button>
+        {fullHeight && (
+          <button
+            onClick={() => map?.fitBounds(PH_BOUNDS)}
+            className="h-8 px-3 bg-[#132338] border border-white/10 rounded shadow-card text-white text-xs font-mono flex items-center justify-center hover:bg-[#1c3354] transition-colors"
+          >
+            Whole PH
+          </button>
+        )}
       </div>
 
+      {/* Legend */}
       <div className="absolute bottom-4 left-4 z-[400] pointer-events-none">
         <div className="bg-[#132338]/90 border border-white/10 p-3 rounded shadow-card-sm backdrop-blur-sm flex flex-col gap-1.5">
           <div className="text-[10px] uppercase tracking-wider text-white/50 font-mono mb-1">Stress Levels</div>

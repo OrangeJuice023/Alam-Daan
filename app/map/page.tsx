@@ -1,7 +1,9 @@
+// app/map/page.tsx
 import { Suspense } from 'react';
 import { Header } from '@/components/shared/Header';
 import { DynamicStressMap } from '@/components/dashboard/DynamicStressMap';
 import { LoadingSkeleton } from '@/components/shared/LoadingSkeleton';
+import { getLGUList } from '@/lib/server/lguService';
 import type { LGUData } from '@/lib/types';
 
 export const metadata = {
@@ -9,27 +11,20 @@ export const metadata = {
 };
 
 export const revalidate = 3600;
+export const maxDuration = 60;
 
 async function getInitialLGUs(): Promise<LGUData[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  
-  // Vercel build environments do not run a localhost server. Recursive fetching crashes the builder.
-  if (baseUrl === 'http://localhost:3000' && process.env.VERCEL) {
-    return [];
-  }
-
   try {
-    const res = await fetch(`${baseUrl}/api/lgu-list`, { next: { revalidate: 3600 } });
-    if (!res.ok) return [];
-    return res.json();
-  } catch (error) {
+    return await getLGUList();
+  } catch (err) {
+    console.error('Failed to build initial LGU list:', err);
     return [];
   }
 }
 
 export default async function MapPage() {
   const initialLGUs = await getInitialLGUs();
-  
+
   return (
     <>
       <Header />
@@ -37,7 +32,7 @@ export default async function MapPage() {
         <Suspense fallback={<LoadingSkeleton variant="map" />}>
           <DynamicStressMap lguList={initialLGUs} fullHeight={true} />
         </Suspense>
-        
+
         {/* Overlay Title */}
         <div className="absolute top-6 left-6 z-[400] pointer-events-none">
           <div className="bg-[#132338]/90 border border-white/10 p-5 rounded-lg shadow-card backdrop-blur-md">

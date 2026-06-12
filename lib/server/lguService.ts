@@ -45,7 +45,7 @@ export async function getMapillaryImages(bbox: Bbox, limit = IMAGES_PER_LGU): Pr
   url.searchParams.set('access_token', token);
   url.searchParams.set('bbox', bbox.join(','));
   url.searchParams.set('limit', String(limit));
-  url.searchParams.set('fields', 'id,geometry,captured_at,sequence,thumb_2048_url');
+  url.searchParams.set('fields', 'id,geometry,captured_at,sequence,thumb_1024_url,thumb_2048_url,thumb_original_url');
 
   try {
     const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
@@ -56,7 +56,7 @@ export async function getMapillaryImages(bbox: Bbox, limit = IMAGES_PER_LGU): Pr
       id: String(img.id),
       coordinates: (img.geometry as { coordinates: [number, number] }).coordinates,
       capturedAt: String(img.captured_at ?? ''),
-      thumbUrl: String(img.thumb_2048_url ?? ''),
+      thumbUrl: String(img.thumb_2048_url ?? img.thumb_1024_url ?? img.thumb_original_url ?? ''),
       sequenceId: String(img.sequence ?? ''),
     }));
   } catch (err) {
@@ -145,7 +145,13 @@ export interface RoadNetworkStats {
   source: 'osm' | 'estimate';
 }
 
-const OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+// Multiple public Overpass instances; main instance often rate-limits
+// cloud-provider IPs (like Vercel build machines), so fail over.
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+];
 
 // Overpass fair-use policy allows max 2 concurrent connections per client.
 // This limiter ensures all 8 LGU queries respect that even though
@@ -167,14 +173,22 @@ export async function getRoadStats(bbox: Bbox): Promise<RoadNetworkStats | null>
 
   try {
     return await overpassLimit(async () => {
-      const res = await fetch(
-        `${OVERPASS_ENDPOINT}?data=${encodeURIComponent(query)}`,
-        {
-          next: { revalidate: 86400 }, // road networks change slowly; cache daily
-          signal: AbortSignal.timeout(20000),
+      let res: Response | null = null;
+      for (const endpoint of OVERPASS_ENDPOINTS) {
+        try {
+          res = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, {
+            next: { revalidate: 86400 }, // road networks change slowly; cache daily
+            signal: AbortSignal.timeout(15000),
+          });
+          if (res.ok) break;
+          console.warn(`Overpass ${endpoint} -> HTTP ${res.status}, trying next mirror`);
+          res = null;
+        } catch (e) {
+          console.warn(`Overpass ${endpoint} failed:`, e);
+          res = null;
         }
-      );
-      if (!res.ok) return null;
+      }
+      if (!res) return null;
 
       const data = await res.json();
       const stat = (data.elements ?? []).find(

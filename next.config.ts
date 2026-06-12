@@ -1,3 +1,4 @@
+// next.config.ts
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -22,21 +23,14 @@ const nextConfig: NextConfig = {
       {
         source: '/',
         destination: '/dashboard',
-        permanent: true,
+        permanent: false,
       },
     ];
   },
-  async headers() {
-    return [
-      {
-        source: '/api/:path*',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, OPTIONS' },
-        ],
-      },
-    ];
-  },
+  // NOTE: wildcard CORS headers removed deliberately. The dashboard is
+  // same-origin, so no cross-origin access to /api/* is needed — and the
+  // wildcard previously let any website consume the OpenRouter-backed
+  // /api/classify endpoint from a browser.
 };
 
 export default nextConfig;

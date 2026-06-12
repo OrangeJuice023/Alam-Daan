@@ -6,6 +6,7 @@ import { DecayBreakdown } from '@/components/dashboard/DecayBreakdown';
 import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
 import { ActionCard } from '@/components/dashboard/ActionCard';
 import { LoadingSkeleton } from '@/components/shared/LoadingSkeleton';
+import { HowToUse } from '@/components/shared/HowToUse';
 import { DynamicStressMap } from '@/components/dashboard/DynamicStressMap';
 import { getLGUList } from '@/lib/server/lguService';
 import type { LGUData } from '@/lib/types';
@@ -53,6 +54,7 @@ export default async function DashboardPage() {
         </main>
 
       </div>
+      <HowToUse />
     </>
   );
 }

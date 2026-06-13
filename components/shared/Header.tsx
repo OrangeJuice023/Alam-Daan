@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LiveClock } from './LiveClock';
+import { Logo } from './Logo';
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const pathname = usePathname();
@@ -34,24 +35,23 @@ export function Header() {
 
       {/* Main nav row */}
       <div className="px-6 h-16 flex items-center justify-between">
-        {/* Logo block — mimics PhilSA seal + name stack */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#1c3354] border border-[#c9a84c]/40
-                          flex items-center justify-center text-[#c9a84c] text-xs font-bold leading-none tracking-tighter">
-            PH
+        {/* Logo block — Alam Daan mark + name stack */}
+        <Link href="/dashboard" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-lg bg-[#1c3354] border border-[#c9a84c]/40 flex items-center justify-center text-[#c9a84c] group-hover:border-[#c9a84c]/70 transition-colors">
+            <Logo className="w-6 h-6" />
           </div>
           <div className="border-l border-white/20 pl-3">
             <div className="text-[9px] text-white/50 tracking-widest uppercase font-mono">
               Republic of the Philippines
             </div>
-            <div className="text-white font-semibold text-sm tracking-wide font-serif">
+            <div className="text-white font-bold text-sm tracking-tight">
               Alam Daan
             </div>
-            <div className="text-[10px] text-[#2e86c1] tracking-wide font-serif italic drop-shadow-sm">
+            <div className="text-[10px] text-[#2e86c1] tracking-wide">
               Infrastructure Intelligence System
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Center nav links */}
         <nav className="hidden md:flex items-center gap-8">

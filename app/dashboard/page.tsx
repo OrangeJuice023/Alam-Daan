@@ -6,7 +6,6 @@ import { DecayBreakdown } from '@/components/dashboard/DecayBreakdown';
 import { MetricsGrid } from '@/components/dashboard/MetricsGrid';
 import { ActionCard } from '@/components/dashboard/ActionCard';
 import { LoadingSkeleton } from '@/components/shared/LoadingSkeleton';
-import { HowToUse } from '@/components/shared/HowToUse';
 import { DynamicStressMap } from '@/components/dashboard/DynamicStressMap';
 import { getLGUList } from '@/lib/server/lguService';
 import type { LGUData } from '@/lib/types';
@@ -44,7 +43,7 @@ export default async function DashboardPage() {
         <main className="flex-1 h-full overflow-y-auto w-full relative z-0">
           <DynamicStressMap lguList={initialLGUs} />
 
-          <div className="p-8 max-w-6xl mx-auto relative z-10">
+          <div className="px-6 py-8 md:px-8 max-w-6xl mx-auto relative z-10">
             <Suspense fallback={<LoadingSkeleton variant="detail" />}>
               <DecayBreakdown />
               <MetricsGrid />
@@ -54,7 +53,6 @@ export default async function DashboardPage() {
         </main>
 
       </div>
-      <HowToUse />
     </>
   );
 }

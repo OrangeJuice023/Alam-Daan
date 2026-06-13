@@ -22,9 +22,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans:  ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['"Source Serif 4"', 'Georgia', 'serif'],
-        mono:  ['"JetBrains Mono"', 'monospace'],
+        sans:  ['Overpass', 'system-ui', 'sans-serif'],
+        serif: ['Overpass', 'system-ui', 'sans-serif'],
+        mono:  ['"Overpass Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
         'card':   '0 4px 24px rgba(0,0,0,0.4)',

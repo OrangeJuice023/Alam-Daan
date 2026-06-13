@@ -1,71 +1,76 @@
-// components/shared/HowToUse.tsx
 'use client';
 
-import { useState } from 'react';
-import { HelpCircle, X, MousePointerClick, Map as MapIcon, Activity } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { HelpCircle, X, MousePointerClick, Palette, Gauge } from 'lucide-react';
 
-// Floating "How to use" guide. Mount once per page; it positions itself
-// bottom-right above the map attribution.
+const STEPS = [
+  { icon: MousePointerClick, title: 'Select a city', text: 'Click any colored boundary on the map, or pick a city from the dashboard sidebar.' },
+  { icon: Palette, title: 'Read the colors', text: 'Each city is shaded by its priority tier — green (low stress) through to red (urgent). The legend sits at the bottom-left of the map.' },
+  { icon: Gauge, title: 'Inspect the score', text: 'The Urban Stress Score (0–1) blends road decay from street imagery with Sentinel-2 built-up and vegetation indices. Full breakdown on the Methodology page.' },
+];
+
 export function HowToUse() {
   const [open, setOpen] = useState(false);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
   return (
-    <div className="fixed bottom-6 right-6 z-[500] flex flex-col items-end gap-3">
-      {open && (
-        <div className="w-[320px] bg-[#132338]/95 border border-white/10 rounded-lg shadow-card backdrop-blur-md p-5 text-left">
-          <div className="flex items-start justify-between mb-4">
-            <h3 className="font-serif text-white text-lg">How to use this map</h3>
-            <button
-              onClick={() => setOpen(false)}
-              aria-label="Close guide"
-              className="text-white/40 hover:text-white transition-colors -mt-1"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          <ol className="space-y-4 text-sm text-[#aec6cf] leading-relaxed">
-            <li className="flex gap-3">
-              <MousePointerClick className="w-4 h-4 text-[#2e86c1] shrink-0 mt-0.5" />
-              <span>
-                <strong className="text-white font-medium">Select a city</strong> — click a
-                colored boundary on the map, or pick one from the dashboard sidebar.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <MapIcon className="w-4 h-4 text-[#2e86c1] shrink-0 mt-0.5" />
-              <span>
-                <strong className="text-white font-medium">Read the colors</strong> — each city
-                is shaded by its priority tier, from green (low stress) to red (urgent).
-                The legend is at the bottom left.
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <Activity className="w-4 h-4 text-[#2e86c1] shrink-0 mt-0.5" />
-              <span>
-                <strong className="text-white font-medium">Inspect the score</strong> — the
-                Urban Stress Score (0–1) combines road decay detected in street-level
-                imagery with Sentinel-2 built-up and vegetation indices. Details are on
-                the Methodology page.
-              </span>
-            </li>
-          </ol>
-
-          <p className="mt-4 pt-3 border-t border-white/10 text-[11px] text-white/40 font-mono leading-relaxed">
-            Data: Mapillary street imagery · OpenStreetMap · Sentinel-2 (Element84 STAC).
-            Scores refresh hourly.
-          </p>
-        </div>
-      )}
-
+    <>
+      {/* Trigger — quiet pill, sits inline wherever it's mounted */}
       <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex items-center gap-2 bg-[#132338] border border-white/10 rounded-full pl-3 pr-4 py-2 shadow-card text-white text-xs font-mono hover:bg-[#1c3354] transition-colors"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-white/60 hover:text-white border border-white/15 hover:border-white/30 rounded-full px-3 py-1.5 transition-colors"
       >
-        <HelpCircle className="w-4 h-4 text-[#2e86c1]" />
+        <HelpCircle className="w-3.5 h-3.5" />
         How to use
       </button>
-    </div>
+
+      {/* Modal */}
+      {open && (
+        <div
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="w-full max-w-md bg-[#132338] border border-white/10 rounded-xl shadow-card overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+              <h3 className="font-serif text-white text-lg">How to use this map</h3>
+              <button onClick={() => setOpen(false)} aria-label="Close" className="text-white/40 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <ol className="p-6 space-y-5">
+              {STEPS.map(({ icon: Icon, title, text }, i) => (
+                <li key={title} className="flex gap-4">
+                  <div className="shrink-0 w-8 h-8 rounded-full bg-[#1c3354] border border-[#2e86c1]/30 flex items-center justify-center text-[#2e86c1] font-mono text-sm">
+                    {i + 1}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Icon className="w-4 h-4 text-[#2e86c1]" />
+                      <span className="text-white font-medium text-sm">{title}</span>
+                    </div>
+                    <p className="text-sm text-[#8ba1b0] leading-relaxed">{text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div className="px-6 py-3 border-t border-white/10 text-[11px] text-white/40 font-mono">
+              Data: Mapillary · OpenStreetMap · Sentinel-2. Refreshed hourly.
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

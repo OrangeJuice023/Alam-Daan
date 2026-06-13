@@ -35,14 +35,14 @@ export default async function MapPage() {
         </Suspense>
 
         {/* Overlay Title */}
-        <div className="absolute top-6 left-6 z-[400] pointer-events-none">
+        <div className="absolute top-6 left-6 z-[400]">
           <div className="bg-[#132338]/90 border border-white/10 p-5 rounded-lg shadow-card backdrop-blur-md">
             <h1 className="text-xl font-serif text-white mb-1">National LGU Stress Map</h1>
-            <p className="text-xs font-mono text-[#2e86c1] tracking-wider uppercase">Full Interactive Explorer</p>
+            <p className="text-xs font-mono text-[#2e86c1] tracking-wider uppercase mb-3">Full Interactive Explorer</p>
+            <HowToUse />
           </div>
         </div>
       </main>
-      <HowToUse />
     </>
   );
 }

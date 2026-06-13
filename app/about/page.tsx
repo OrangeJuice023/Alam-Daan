@@ -1,50 +1,57 @@
-import { Header } from '@/components/shared/Header';
+import { PageShell } from '@/components/shared/PageShell';
 import { Logo } from '@/components/shared/Logo';
 
 export const metadata = {
   title: 'About | Alam Daan',
 };
 
+const STACK = [
+  { label: 'Geospatial aggregation', value: 'Mapillary street imagery + OpenStreetMap road network, queried per city bounding box.' },
+  { label: 'Satellite analytics', value: 'Sentinel-2 L2A via Element84 STAC; NDBI / NDVI proxy indices from scene metadata.' },
+  { label: 'Vision-language pipeline', value: 'OpenRouter VLM (nvidia/nemotron-nano-12b-v2-vl) classifies road decay from street imagery.' },
+  { label: 'Architecture', value: 'Next.js 16 App Router with hourly ISR, Zustand state, Tailwind CSS, Leaflet maps.' },
+];
+
 export default function AboutPage() {
   return (
-    <>
-      <Header />
-      <main className="flex-1 overflow-y-auto w-full px-6 py-12 md:px-16 md:py-20">
-        <div className="bg-[#132338] relative rounded-2xl p-12 md:p-16 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] max-w-3xl w-full mx-auto text-center overflow-hidden">
-          {/* Decorative glowing orb background */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#c9a84c]/5 rounded-full blur-[80px] pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[#2e86c1]/10 rounded-full blur-[80px] pointer-events-none" />
-          
-          <div className="relative z-10">
-            <div className="w-24 h-24 rounded-2xl border border-[#c9a84c]/50 bg-[#1c3354] flex items-center justify-center text-[#c9a84c] mb-8 mx-auto shadow-inner">
-              <Logo className="w-14 h-14" />
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl font-serif text-white mb-2 tracking-tight">Alam Daan</h1>
-            <p className="text-[#2e86c1] text-lg mb-10 tracking-wide font-mono uppercase text-sm">Infrastructure Intelligence System</p>
-            
-            <div className="w-16 h-[1px] bg-white/20 mx-auto mb-10" />
-            
-            <p className="text-[#aec6cf] text-lg leading-relaxed mb-8 font-light">
-              This application was architected and developed by <strong className="text-white font-medium">Gervi Corado</strong>. It serves as an active technical showcase and project resume crafted specifically for application to the <strong className="text-[#c9a84c] font-medium tracking-wide">Philippine Space Agency (PhilSA)</strong>.
-            </p>
-            
-            <div className="bg-[#07111a]/50 border border-white/5 rounded-lg p-6 my-8 text-sm text-[#8ba1b0] leading-loose text-left font-mono">
-              <span className="text-[#2e86c1] block mb-2 text-[10px] tracking-widest uppercase">System Stack & Integrations</span>
-              <ul className="list-disc pl-5 space-y-2">
-                <li><span className="text-white/80">Core Protocol:</span> Automated geospatial intelligence aggregation</li>
-                <li><span className="text-white/80">Satellite Analytics:</span> Element84 STAC Sentinel-2 Indexing (NDBI/NDVI)</li>
-                <li><span className="text-white/80">Vision-Language Pipeline:</span> OpenRouter VLM (nvidia/nemotron-nano-12b-v2-vl) parsing crowdsourced Mapillary imagery</li>
-                <li><span className="text-white/80">Architecture:</span> Next.js 16 App Router with hourly ISR, Zustand state, Tailwind styling</li>
-              </ul>
-            </div>
-            
-            <p className="text-xs text-white/30 uppercase tracking-[0.2em] font-mono mt-12">
-              Live data from public APIs, refreshed hourly. Satellite indices are metadata-derived proxies.
-            </p>
-          </div>
+    <PageShell width="narrow">
+      {/* Hero */}
+      <div className="flex flex-col items-center text-center mb-12">
+        <div className="w-20 h-20 rounded-2xl border border-[#c9a84c]/50 bg-[#1c3354] flex items-center justify-center text-[#c9a84c] mb-6 shadow-inner">
+          <Logo className="w-11 h-11" />
         </div>
-      </main>
-    </>
+        <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">Alam Daan</h1>
+        <p className="text-[#2e86c1] font-mono text-xs uppercase tracking-[0.2em] mb-8">
+          Infrastructure Intelligence System
+        </p>
+        <p className="text-[#aec6cf] text-lg leading-relaxed font-light max-w-xl">
+          An infrastructure decay detection and priority-mapping system, developed by{' '}
+          <strong className="text-white font-medium">Gervi Corado</strong> as a technical
+          showcase for application to the{' '}
+          <strong className="text-[#c9a84c] font-medium">Philippine Space Agency (PhilSA)</strong>.
+        </p>
+      </div>
+
+      {/* Stack */}
+      <div className="bg-[#132338] border border-white/10 rounded-xl overflow-hidden shadow-card">
+        <div className="px-6 py-4 border-b border-white/10">
+          <span className="text-[10px] text-[#2e86c1] font-mono tracking-widest uppercase">
+            System Stack &amp; Integrations
+          </span>
+        </div>
+        <dl className="divide-y divide-white/5">
+          {STACK.map(({ label, value }) => (
+            <div key={label} className="px-6 py-4 grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-6">
+              <dt className="text-white font-medium text-sm">{label}</dt>
+              <dd className="text-[#8ba1b0] text-sm leading-relaxed font-mono">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <p className="text-center text-[11px] text-white/30 uppercase tracking-[0.2em] font-mono mt-10">
+        Live data from public APIs, refreshed hourly · Satellite indices are metadata-derived proxies
+      </p>
+    </PageShell>
   );
 }

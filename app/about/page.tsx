@@ -1,4 +1,5 @@
 import { Header } from '@/components/shared/Header';
+import { Logo } from '@/components/shared/Logo';
 
 export const metadata = {
   title: 'About | Alam Daan',
@@ -15,12 +16,12 @@ export default function AboutPage() {
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-[#2e86c1]/10 rounded-full blur-[80px] pointer-events-none" />
           
           <div className="relative z-10">
-            <div className="w-24 h-24 rounded-full border border-[#c9a84c]/50 bg-[#1c3354] flex items-center justify-center text-[#c9a84c] text-3xl font-serif font-bold mb-8 mx-auto shadow-inner">
-              GC
+            <div className="w-24 h-24 rounded-2xl border border-[#c9a84c]/50 bg-[#1c3354] flex items-center justify-center text-[#c9a84c] mb-8 mx-auto shadow-inner">
+              <Logo className="w-14 h-14" />
             </div>
             
             <h1 className="text-4xl md:text-5xl font-serif text-white mb-2 tracking-tight">Alam Daan</h1>
-            <p className="text-[#2e86c1] font-serif text-lg italic mb-10 tracking-wide">Infrastructure Intelligence System</p>
+            <p className="text-[#2e86c1] text-lg mb-10 tracking-wide font-mono uppercase text-sm">Infrastructure Intelligence System</p>
             
             <div className="w-16 h-[1px] bg-white/20 mx-auto mb-10" />
             

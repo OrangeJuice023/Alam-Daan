@@ -1,4 +1,4 @@
-import { Header } from '@/components/shared/Header';
+import { PageShell } from '@/components/shared/PageShell';
 import { Microscope, Satellite, Network, Activity, Camera, Layers, Calculator, ListOrdered } from 'lucide-react';
 
 export const metadata = {
@@ -28,10 +28,7 @@ const TIERS = [
 
 export default function MethodologyPage() {
   return (
-    <>
-      <Header />
-      <main className="flex-1 overflow-y-auto w-full px-6 py-12 md:px-12 md:py-16 relative">
-        <div className="w-full max-w-[1100px] mx-auto">
+    <PageShell width="wide">
 
           <div className="mb-14 border-b border-white/10 pb-10 flex flex-col md:flex-row justify-between md:items-end gap-6">
             <div className="max-w-3xl">
@@ -123,8 +120,6 @@ export default function MethodologyPage() {
             </div>
           </section>
 
-        </div>
-      </main>
-    </>
+    </PageShell>
   );
 }

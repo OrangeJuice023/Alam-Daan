@@ -1,4 +1,4 @@
-import { Header } from '@/components/shared/Header';
+import { PageShell } from '@/components/shared/PageShell';
 import { Server, Image as ImageIcon, Satellite, Route, Cpu } from 'lucide-react';
 
 export const metadata = {
@@ -52,10 +52,7 @@ const methodColor = (m: string) => (m === 'POST' ? '#c0392b' : '#1e8449');
 
 export default function ApiDocsPage() {
   return (
-    <>
-      <Header />
-      <main className="flex-1 overflow-y-auto w-full px-6 py-12 md:px-12 md:py-16 relative">
-        <div className="w-full max-w-5xl mx-auto">
+    <PageShell width="wide">
 
           <div className="mb-12 border-b border-white/10 pb-8">
             <div className="text-[10px] text-[#6c8394] font-mono tracking-widest uppercase mb-3">Reference</div>
@@ -119,8 +116,6 @@ export default function ApiDocsPage() {
             })}
           </div>
 
-        </div>
-      </main>
-    </>
+    </PageShell>
   );
 }

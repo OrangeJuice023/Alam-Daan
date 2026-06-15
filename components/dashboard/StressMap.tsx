@@ -149,7 +149,7 @@ export function StressMap({ lguList, fullHeight }: StressMapProps) {
   };
 
   return (
-    <div className={`${fullHeight ? 'flex-1 h-full' : 'h-[50vh] min-h-[400px]'} w-full relative z-0 border-b border-white/10`}>
+    <div className={`${fullHeight ? 'flex-1 h-full' : 'h-[42vh] min-h-[320px] max-h-[460px]'} w-full relative z-0 border-b border-white/10`}>
       <MapContainer
         center={[14.5995, 120.9842]}
         zoom={10}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useDashboardStore } from '@/store/dashboardStore';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 
 export function DecayBreakdown() {
   const { selectedLGU } = useDashboardStore();
@@ -59,7 +59,7 @@ export function DecayBreakdown() {
                 dataKey="name" 
                 axisLine={false} 
                 tickLine={false}
-                tick={{ fill: '#4a5568', fontSize: 12, fontFamily: 'Inter' }}
+                tick={{ fill: '#4a5568', fontSize: 12, fontFamily: 'Overpass Mono' }}
                 width={80}
               />
               <Tooltip
@@ -85,6 +85,12 @@ export function DecayBreakdown() {
                 {data.map((entry, index) => (
                    <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
+                <LabelList
+                  dataKey="value"
+                  position="right"
+                  formatter={(v: React.ReactNode) => `${v}%`}
+                  style={{ fill: '#4a5568', fontSize: 12, fontFamily: 'Overpass Mono' }}
+                />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
